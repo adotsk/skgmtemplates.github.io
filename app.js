@@ -174,6 +174,7 @@ async function checkForBirthdays() {
         const phoneColIdx = columnLetterToIndex(document.getElementById('phoneColumn').value);
         const birthdayColIdx = columnLetterToIndex(document.getElementById('birthdayColumn').value);
         const salutationColIdx = columnLetterToIndex(document.getElementById('salutationColumn').value);
+        const triggerColIdx = columnLetterToIndex(document.getElementById('triggerColumn').value);
         
         const birthdayPeople = [];
         
