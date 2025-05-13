@@ -1,2 +1,2 @@
-# skgmtemplates.guthub.io
-Daily good morning templates
+git clone https://github.com/YOUR_USERNAME/whatsapp-birthday-automation.git
+cd skgmtemplates
