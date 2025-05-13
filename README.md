@@ -1,2 +1,2 @@
-git clone https://skgmtemplates.github.io
+git clone https://adotsk.github.io/skgmtemplates.github.io
 cd skgmtemplates
