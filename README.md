@@ -1,2 +1,2 @@
-git clone https://github.com/YOUR_USERNAME/whatsapp-birthday-automation.git
+git clone https://github.com/skgmtemplates.guthub.io/skgmtemplates.git
 cd skgmtemplates
