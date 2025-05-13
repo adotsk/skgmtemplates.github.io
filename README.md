@@ -1,2 +1,2 @@
-git clone https://github.com/skgmtemplates.guthub.io/skgmtemplates.git
+git clone https://github.com/skgmtemplates.github.io/skgmtemplates.git
 cd skgmtemplates
