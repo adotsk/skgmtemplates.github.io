@@ -9,7 +9,10 @@ const COLUMNS = { NAME: 1, PHONE: 2, SALUTATION: 7, ACTION: 8 };
 // ========== ESSENTIAL FUNCTIONS FIRST ========== //
 function log(message) {
   const statusLog = document.getElementById('statusLog');
-  if (!statusLog) return;
+  if (!statusLog) {
+    console.error('Status log container missing!');
+    return;
+  }
   
   const entry = document.createElement('div');
   entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
