@@ -16,15 +16,7 @@ function log(message) {
   statusLog.scrollTop = statusLog.scrollHeight;
 }
 
-// ========== GLOBAL VARIABLES ========== //
-let tokenClient;
-let checkInterval;
-let isRunning = false;
-let lastCheckedDate = '';
-let sheetsAPILoaded = false;
-
-// ========== GOOGLE API INITIALIZATION ========== //
-
+// ========== BUTTON STATE MANAGEMENT ========== //
 function updateButtonStates() {
   const isAuth = localStorage.getItem('isAuthenticated') === 'true';
   const sheetsReady = sheetsAPILoaded && gapi.client.sheets;
@@ -33,19 +25,24 @@ function updateButtonStates() {
   document.getElementById('startBtn').disabled = !isAuth || !sheetsReady || isRunning;
   document.getElementById('stopBtn').disabled = !isRunning;
   
-  // Visual feedback
   document.getElementById('startBtn').title = sheetsReady ? '' : 'Waiting for Sheets API';
 }
 
+// ========== GLOBAL VARIABLES ========== //
+let tokenClient;
+let checkInterval;
+let isRunning = false;
+let lastCheckedDate = '';
+let sheetsAPILoaded = false;
+
+// ========== GOOGLE API INITIALIZATION ========== //
 async function initializeGoogleAPI() {
   return new Promise((resolve) => {
     gapi.load('client', async () => {
       try {
-        // Initialize core client
         await gapi.client.init({});
         log('Google API core initialized');
 
-        // Explicitly load Sheets API with error handling
         await new Promise((sheetsResolve, sheetsReject) => {
           gapi.client.load('sheets', 'v4', () => {
             if (gapi.client.sheets) {
@@ -83,7 +80,6 @@ async function initializeGoogleAPI() {
         resolve();
       } catch (error) {
         log(`Initialization failed: ${error.message || error}`);
-        console.error('Initialization error:', error);
       }
     });
   });
