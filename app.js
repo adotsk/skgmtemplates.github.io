@@ -195,7 +195,8 @@ async function checkForBirthdays() {
             const receiverName = row[receiverNameColIdx] || '';
             
             // Check if today is the birthday AND action is 'Send'
-            if (birthday && birthday.includes(formattedDate) && action.trim().toLowerCase() === 'send') {
+            //if (birthday && birthday.includes(formattedDate) && 
+            if action.trim().toLowerCase() === 'send') {
                 birthdayPeople.push({ 
                     name, 
                     phone, 
