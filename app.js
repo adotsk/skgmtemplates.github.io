@@ -89,15 +89,23 @@ function stopAutomation() {
 // Check for Messages to Send
 async function checkForBirthdays() {
     try {
+        log('=== Starting checkForBirthdays ===');
+        
         const today = new Date().toLocaleDateString();
-        if (today === lastCheckedDate) return;
-        lastCheckedDate = today;
+        log(`Today's date: ${today}`);
+        log(`Last checked date: ${lastCheckedDate}`);
 
+        // Add this debug line
+        log(`Attempting to access spreadsheet: ${SPREADSHEET_ID}`);
+        
         const response = await gapi.client.sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
             range: SHEET_NAME
         });
 
+        log('Spreadsheet data fetched successfully');
+        log(`Raw response: ${JSON.stringify(response.result.values)}`);
+        
         const rows = response.result.values || [];
         const recipients = rows.slice(1).filter(row => 
             row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
@@ -113,7 +121,7 @@ async function checkForBirthdays() {
             updateProgress(recipient);
         }
     } catch (error) {
-        log('Error: ' + error.message);
+        log('Full error object: ' + JSON.stringify(error)); // Critical for debugging
     }
 }
 
