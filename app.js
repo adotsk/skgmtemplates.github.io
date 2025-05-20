@@ -123,8 +123,7 @@ function scheduleNextCheck() {
 function startAutomation() {
   isRunning = true;
   updateButtonStates();
-  log('Automation started!');
-  checkForBirthdays();
+  checkForBirthdays(); // Now defined above
   scheduleNextCheck();
 }
 
@@ -132,7 +131,6 @@ function stopAutomation() {
   isRunning = false;
   clearTimeout(checkInterval);
   updateButtonStates();
-  log('Automation stopped.');
 }
 
 // ========== MAIN INITIALIZATION ========== //
