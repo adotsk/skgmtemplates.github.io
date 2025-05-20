@@ -175,7 +175,7 @@ async function checkForBirthdays() {
         const birthdayColIdx = columnLetterToIndex(document.getElementById('birthdayColumn').value);
         const salutationColIdx = columnLetterToIndex(document.getElementById('salutationColumn').value);
         const actionColIdx = columnLetterToIndex(document.getElementById('actionColumn').value);
-        const receiverNameColIdx = columnLetterToIndex(document.getElementById('receiverNameColumn').value);
+        const receiverNameColIdx = 1;
         
         const birthdayPeople = [];
         
@@ -196,7 +196,7 @@ async function checkForBirthdays() {
             
             // Check if today is the birthday AND action is 'Send'
             //if (birthday && birthday.includes(formattedDate) && 
-            if action.trim().toLowerCase() === 'send') {
+            if (action.trim().toLowerCase() === 'send') {
                 birthdayPeople.push({ 
                     name, 
                     phone, 
@@ -266,8 +266,7 @@ function saveSettings() {
         phoneColumn: document.getElementById('phoneColumn').value,
         birthdayColumn: document.getElementById('birthdayColumn').value,
         salutationColumn: document.getElementById('salutationColumn').value,
-        actionColumn: document.getElementById('actionColumn').value,
-        receiverNameColumn: document.getElementById('receiverNameColumn').value,
+        actionColumn: document.getElementById('actionColumn').value,        
         messageTemplate: document.getElementById('messageTemplate').value,
         checkTime: document.getElementById('checkTime').value,
         autoStart: document.getElementById('autoStart').checked
@@ -289,8 +288,7 @@ function loadSavedSettings() {
         document.getElementById('phoneColumn').value = settings.phoneColumn || 'B';
         document.getElementById('birthdayColumn').value = settings.birthdayColumn || 'C';
         document.getElementById('salutationColumn').value = settings.salutationColumn || 'D';
-        document.getElementById('actionColumn').value = settings.actionColumn || 'E';
-        document.getElementById('receiverNameColumn').value = settings.receiverNameColumn || 'F';
+        document.getElementById('actionColumn').value = settings.actionColumn || 'E';        
         document.getElementById('messageTemplate').value = settings.messageTemplate || 'Happy Birthday {salutation} {name}! Wishing you a wonderful day filled with joy and happiness.';
         document.getElementById('checkTime').value = settings.checkTime || '09:00';
         document.getElementById('autoStart').checked = settings.autoStart || false;
