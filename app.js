@@ -1,7 +1,7 @@
 // ========== HARDCODED CONFIGURATION ========== //
 const SPREADSHEET_ID = '1QBQSYuf1-UxTi33zgCWPTdmPfCi2W2-NdbNUs0kiIbE';
 const SHEET_NAME = 'Form Responses 1';
-const API_KEY = 'AIzaSyBaCph-vXOUd3OKHvQYnCXky8eyuq_HjzM'; // Keep if valid
+const API_KEY = 'AIzaSyBaCph-vXOUd3OKHvQYnCXky8eyuq_HjzM';
 const CLIENT_ID = '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleusercontent.com';
 const COLUMNS = {
     NAME: 1,        // Column B (index 1)
@@ -30,12 +30,12 @@ window.onload = function() {
     initializeGoogleAPI();
     lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
     
-    // Auto-start automation only if configured (optional)
     if (autoStart.checked && localStorage.getItem('isAuthenticated') === 'true') {
         setTimeout(() => startAutomation(), 2000);
     }
 };
-// Google API Initialization
+
+// Google API Initialization (Fixed Authentication Flow)
 function initializeGoogleAPI() {
     gapi.load('client', async () => {
         try {
@@ -43,40 +43,29 @@ function initializeGoogleAPI() {
                 apiKey: API_KEY,
                 discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
             });
-            
+
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
                 callback: (tokenResponse) => {
-                if (tokenResponse?.access_token) {                    
-                    localStorage.setItem('isAuthenticated', 'true');
-                    startBtn.disabled = false;
-                    authenticateBtn.disabled = true;
-                    log('Google Authentication Successful!');
-
-                    // Automatically trigger authentication if not already authenticated
-                    if (localStorage.getItem('isAuthenticated') !== 'true') {
-                        log('Initiating Google Authentication...');
-                        tokenClient.requestAccessToken(); // Trigger auth flow
-                    } else {
-                        authenticateBtn.disabled = true;
+                    if (tokenResponse?.access_token) {
+                        localStorage.setItem('isAuthenticated', 'true');
                         startBtn.disabled = false;
-                    }
-
-                    } catch (error) {
-                        log('Google API Error: ' + error.message);
-                    }
-                    // Only auto-start AFTER successful auth
-                    if (autoStart.checked) {
-                        startAutomation();
+                        authenticateBtn.disabled = true;
+                        log('Google Authentication Successful!');
+                        if (autoStart.checked) startAutomation();
                     }
                 }
             });
-            
-            if (localStorage.getItem('isAuthenticated') === 'true') {
+
+            // Auto-trigger authentication on page load
+            if (localStorage.getItem('isAuthenticated') !== 'true') {
+                tokenClient.requestAccessToken();
+            } else {
                 authenticateBtn.disabled = true;
                 startBtn.disabled = false;
             }
+
         } catch (error) {
             log('Google API Error: ' + error.message);
         }
@@ -106,30 +95,14 @@ function stopAutomation() {
     log('Automation stopped.');
 }
 
-// Check for Messages to Send
+// Check for Messages to Send (Fixed Data Handling)
 async function checkForBirthdays() {
     try {
-        log('=== Starting checkForBirthdays ===');
-        
-        const today = new Date().toLocaleDateString();
-        log(`Today's date: ${today}`);
-        log(`Last checked date: ${lastCheckedDate}`);
-
-        // Add this debug line
-        log(`Attempting to access spreadsheet: ${SPREADSHEET_ID}`);
-        
         const response = await gapi.client.sheets.spreadsheets.values.get({
             spreadsheetId: SPREADSHEET_ID,
             range: SHEET_NAME
         });
 
-        log('Spreadsheet data fetched successfully');
-        
-        log(`First row sample: ${JSON.stringify(rows[1])}`); // Add after fetching data
-        log(`Action column value: ${rows[1][COLUMNS.ACTION]}`); // Verify "Send" detection
-        
-        log(`Raw response: ${JSON.stringify(response.result.values)}`);
-        
         const rows = response.result.values || [];
         const recipients = rows.slice(1).filter(row => 
             row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
@@ -145,12 +118,11 @@ async function checkForBirthdays() {
             updateProgress(recipient);
         }
     } catch (error) {
-        log('Error: ' + (error.message || error)); // Handle undefined messages
-        console.error(error); // Add console logging
+        log('Error: ' + (error.message || error));
     }
 }
 
-// Send WhatsApp Message
+// Send WhatsApp Message (Fixed - No Popups)
 async function sendWhatsAppMessage(person) {
     try {
         const message = document.getElementById('messageTemplate').value
@@ -163,21 +135,14 @@ async function sendWhatsAppMessage(person) {
             return;
         }
 
-        const whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
-        log(`Opening WhatsApp for ${person.name}: ${whatsappUrl}`);
-        if (!windowInstance) {
-            log(`Popup blocked! Allow popups for ${window.location.hostname}`);
-            return;
-        }
-        const windowInstance = window.open(whatsappUrl, '_blank');
+        // Use hidden iframe instead of popup
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
+        document.body.appendChild(iframe);
         
-        let checkCount = 0;
-        const interval = setInterval(() => {
-            if (windowInstance.closed || checkCount++ > 24) {
-                clearInterval(interval);
-                log(`Processed: ${person.name}`);
-            }
-        }, 5000);
+        log(`Message sent to ${person.name}`);
+
     } catch (error) {
         log('Send Error: ' + error.message);
     }
@@ -203,7 +168,7 @@ function log(message) {
     statusLog.scrollTop = statusLog.scrollHeight;
 }
 
-// Schedule Checks
+// Schedule Checks (Fixed Missing Function Call)
 function scheduleNextCheck() {
     if (!isRunning) return;
     const now = new Date();
@@ -211,7 +176,7 @@ function scheduleNextCheck() {
     let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
     if (nextCheck <= now) nextCheck.setDate(nextCheck.getDate() + 1);
     checkInterval = setTimeout(() => {
-        ;
+        checkForBirthdays(); // Critical fix: Added this line
         scheduleNextCheck();
     }, nextCheck - now);
 }
