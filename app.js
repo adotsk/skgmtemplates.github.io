@@ -24,6 +24,19 @@ let lastCheckedDate = '';
 let sheetsAPILoaded = false;
 
 // ========== GOOGLE API INITIALIZATION ========== //
+
+function updateButtonStates() {
+  const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+  const sheetsReady = sheetsAPILoaded && gapi.client.sheets;
+  
+  document.getElementById('authenticateBtn').disabled = isAuth;
+  document.getElementById('startBtn').disabled = !isAuth || !sheetsReady || isRunning;
+  document.getElementById('stopBtn').disabled = !isRunning;
+  
+  // Visual feedback
+  document.getElementById('startBtn').title = sheetsReady ? '' : 'Waiting for Sheets API';
+}
+
 async function initializeGoogleAPI() {
   return new Promise((resolve) => {
     gapi.load('client', async () => {
@@ -43,19 +56,7 @@ async function initializeGoogleAPI() {
               sheetsReject('Failed to load Sheets API');
             }
           });
-        });
-
-        function updateButtonStates() {
-          const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-          const sheetsReady = sheetsAPILoaded && gapi.client.sheets;
-          
-          document.getElementById('authenticateBtn').disabled = isAuth;
-          document.getElementById('startBtn').disabled = !isAuth || !sheetsReady || isRunning;
-          document.getElementById('stopBtn').disabled = !isRunning;
-          
-          // Visual feedback
-          document.getElementById('startBtn').title = sheetsReady ? '' : 'Waiting for Sheets API';
-        }
+        });        
         
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
