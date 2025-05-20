@@ -1,6 +1,8 @@
 // ========== HARDCODED CONFIGURATION ========== //
 const SPREADSHEET_ID = '1QBQSYuf1-UxTi33zgCWPTdmPfCi2W2-NdbNUs0kiIbE';
 const SHEET_NAME = 'Form Responses 1';
+const API_KEY = 'AIzaSyBaCph-vXOUd3OKHvQYnCXky8eyuq_HjzM'; // Keep if valid
+const CLIENT_ID = '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleusercontent.com';
 const COLUMNS = {
     NAME: 1,        // Column B (index 1)
     PHONE: 2,       // Column C (index 2)
@@ -40,15 +42,16 @@ function initializeGoogleAPI() {
     gapi.load('client', async () => {
         try {
             await gapi.client.init({
-                apiKey: 'AIzaSyBaCph-vXOUd3OKHvQYnCXky8eyuq_HjzM',
+                apiKey: API_KEY,
                 discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
             });
             
             tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleusercontent.com',
+                client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
                 callback: (tokenResponse) => {
                 if (tokenResponse?.access_token) {
+                    gapi.client.setToken(tokenResponse);
                     localStorage.setItem('isAuthenticated', 'true');
                     startBtn.disabled = false;
                     authenticateBtn.disabled = true;
