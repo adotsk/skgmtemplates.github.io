@@ -67,8 +67,34 @@
     </div>
 
     <!-- Google API -->
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
-    <script src="app.js"></script>
+    <script>
+    window.handleGapiLoad = () => {
+        if (!window.gapi) {
+            console.error('gapi failed to load!');
+            return;
+        }
+        window.gapiOnLoad();
+    };
+    </script>
+    <script 
+        src="https://apis.google.com/js/api.js" 
+        onload="handleGapiLoad()" 
+        onerror="console.error('Failed to load gapi!')">
+    </script>
+    
+    <script>
+        window.handleGisLoad = () => {
+            if (!window.google) {
+                console.error('GIS failed to load!');
+                return;
+            }
+            window.gisOnLoad();
+        };
+    </script>
+    <script 
+        src="https://accounts.google.com/gsi/client" 
+        onload="handleGisLoad()" 
+        onerror="console.error('Failed to load GIS!')">
+    </script>
 </body>
 </html>
