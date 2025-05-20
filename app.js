@@ -91,9 +91,11 @@ async function checkForBirthdays() {
     
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
-      range: SHEET_NAME
+      range: SHEET_NAME,
+      // Explicitly exclude API key
+      auth: gapi.client.getToken().access_token
     });
-
+    
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
       row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
