@@ -28,15 +28,13 @@ const autoStart = document.getElementById('autoStart');
 // Initialize on Load
 window.onload = function() {
     initializeGoogleAPI();
-
-     // Initialize lastCheckedDate to prevent undefined errors
     lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
     
+    // Auto-start automation only if configured (optional)
     if (autoStart.checked && localStorage.getItem('isAuthenticated') === 'true') {
         setTimeout(() => startAutomation(), 2000);
     }
 };
-
 // Google API Initialization
 function initializeGoogleAPI() {
     gapi.load('client', async () => {
@@ -50,13 +48,24 @@ function initializeGoogleAPI() {
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
                 callback: (tokenResponse) => {
-                if (tokenResponse?.access_token) {
-                    gapi.client.setToken(tokenResponse);
+                if (tokenResponse?.access_token) {                    
                     localStorage.setItem('isAuthenticated', 'true');
                     startBtn.disabled = false;
                     authenticateBtn.disabled = true;
                     log('Google Authentication Successful!');
 
+                    // Automatically trigger authentication if not already authenticated
+                    if (localStorage.getItem('isAuthenticated') !== 'true') {
+                        log('Initiating Google Authentication...');
+                        tokenClient.requestAccessToken(); // Trigger auth flow
+                    } else {
+                        authenticateBtn.disabled = true;
+                        startBtn.disabled = false;
+                    }
+
+                    } catch (error) {
+                        log('Google API Error: ' + error.message);
+                    }
                     // Only auto-start AFTER successful auth
                     if (autoStart.checked) {
                         startAutomation();
