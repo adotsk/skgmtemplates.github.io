@@ -36,8 +36,8 @@ async function initializeGoogleAPI() {
   return new Promise((resolve) => {
     gapi.load('client', async () => {
       try {
+        // Initialize without API key
         await gapi.client.init({
-          apiKey: API_KEY,
           discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
         });
         
@@ -45,11 +45,15 @@ async function initializeGoogleAPI() {
           client_id: CLIENT_ID,
           scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
           prompt: 'consent',
-          callback: (tokenResponse) => {
+          callback: async (tokenResponse) => {
             if (tokenResponse?.access_token) {
+              // Set the access token for gapi requests
+              gapi.client.setToken(tokenResponse);
+              
               localStorage.setItem('isAuthenticated', 'true');
               updateButtonStates();
               log('Authentication successful');
+              
               if (document.getElementById('autoStart').checked) {
                 startAutomation();
               }
@@ -61,7 +65,12 @@ async function initializeGoogleAPI() {
           log('Starting authentication flow...');
           tokenClient.requestAccessToken();
         } else {
-          log('Google API Authentication Success');
+          // Restore existing token
+          gapi.client.setToken({
+            access_token: localStorage.getItem('access_token'),
+            expires_in: localStorage.getItem('expires_in')
+          });
+          log('Already authenticated');
           updateButtonStates();
         }
         resolve();
