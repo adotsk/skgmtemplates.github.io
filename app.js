@@ -96,26 +96,28 @@ async function checkForBirthdays() {
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: SHEET_NAME
-    }).catch(error => {
-      throw new Error(`API Request Failed: ${error.result?.error?.message || error.message}`);
     });
 
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
-      row[COLUMNS.ACTION]?.trim().toLowerCase() === 'Send'
+      row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
     );
 
     log(`Found ${recipients.length} messages to send`);
     
-    // Add your message sending logic here
+    for (const recipient of recipients) {
+      await sendWhatsAppMessage(recipient);
+      updateProgress(recipient);
+    }
 
   } catch (error) {
-    log(`Critical Error: ${error.message}`);
+    log(`Critical Error: ${error.result?.error?.message || error.message}`);
     console.error('Full error trace:', error);
-    stopAutomation(); // Auto-stop on error
+    stopAutomation();
   }
 }
 
+// ========== SCHEDULING ========== //
 function scheduleNextCheck() {
   if (!isRunning) return;
   
@@ -144,10 +146,8 @@ async function sendWhatsAppMessage(person) {
       return;
     }
 
-    // WhatsApp Web URL
     const whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
     
-    // Open in hidden iframe
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = whatsappUrl;
@@ -160,6 +160,7 @@ async function sendWhatsAppMessage(person) {
   }
 }
 
+// ========== PROGRESS DISPLAY ========== //
 function updateProgress(recipient) {
   const progressLog = document.getElementById('progressLog');
   if (!progressLog) return;
@@ -200,12 +201,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         log('Reinitializing Sheets API...');
         initializeGoogleAPI();
       }
-    }, 5000); // Check API status every 5 seconds
+    }, 5000);
   } catch (error) {
     log(`Fatal initialization error: ${error.message}`);
   }
   
-  // Event listeners
   document.getElementById('authenticateBtn').addEventListener('click', () => {
     tokenClient.requestAccessToken();
   });
@@ -213,6 +213,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('startBtn').addEventListener('click', startAutomation);
   document.getElementById('stopBtn').addEventListener('click', stopAutomation);
 
-  // Initial states
   updateButtonStates();
 });
