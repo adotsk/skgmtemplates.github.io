@@ -16,6 +16,8 @@ let tokenClient;
 let checkInterval;
 let isRunning = false;
 let lastCheckedDate = '';
+let gapiLoaded = false;
+let gisLoaded = false;
 
 // DOM Elements
 const authenticateBtn = document.getElementById('authenticateBtn');
@@ -27,7 +29,14 @@ const autoStart = document.getElementById('autoStart');
 
 // Initialize on Load
 window.onload = function() {
-    initializeGoogleAPI();
+    // Load Google APIs properly
+    window.gapiOnLoad = () => {
+        gapiLoaded = true;
+        initializeGoogleAPI();
+    };
+    window.gisOnLoad = () => {
+        gisLoaded = true;
+    };
     lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
     
     if (autoStart.checked && localStorage.getItem('isAuthenticated') === 'true') {
@@ -39,41 +48,48 @@ window.onload = function() {
 function initializeGoogleAPI() {
     gapi.load('client', async () => {
         try {
+            // Initialize Google Sheets API client
             await gapi.client.init({
                 apiKey: API_KEY,
                 discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+            }).then(() => {
+                log('Google API client initialized successfully');
             });
 
+            // Initialize Google Identity Services
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
                 callback: (tokenResponse) => {
-                    if (tokenResponse?.access_token) {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        log('OAuth token received');
                         localStorage.setItem('isAuthenticated', 'true');
                         startBtn.disabled = false;
                         authenticateBtn.disabled = true;
-                        log('Google Authentication Successful!');
                         if (autoStart.checked) startAutomation();
                     }
+                },
+                error_callback: (error) => {
+                    log('OAuth error: ' + JSON.stringify(error));
                 }
             });
 
-            // Auto-trigger authentication on page load
+            // Auto-trigger auth if not authenticated
             if (localStorage.getItem('isAuthenticated') !== 'true') {
-                tokenClient.requestAccessToken();
+                log('Initiating OAuth flow...');
+                tokenClient.requestAccessToken({prompt: 'consent'});
             } else {
                 authenticateBtn.disabled = true;
                 startBtn.disabled = false;
             }
 
         } catch (error) {
-            log('Google API Error: ' + error.message);
+            // Improved error handling
+            const errorMsg = error.message || JSON.stringify(error);
+            log('Google API Error: ' + errorMsg);
+            console.error('Full error:', error);
         }
     });
-    
-    authenticateBtn.addEventListener('click', () => tokenClient.requestAccessToken());
-    startBtn.addEventListener('click', startAutomation);
-    stopBtn.addEventListener('click', stopAutomation);
 }
 
 // Start Automation
