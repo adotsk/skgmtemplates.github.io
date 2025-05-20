@@ -61,7 +61,7 @@ async function initializeGoogleAPI() {
           log('Starting authentication flow...');
           tokenClient.requestAccessToken();
         } else {
-          log('Already authenticated');
+          log('Google API Authentication Success');
           updateButtonStates();
         }
         resolve();
