@@ -32,12 +32,16 @@ async function initializeGoogleAPI() {
         await gapi.client.init({});
         log('Google API core initialized');
 
-        // Explicitly load Sheets API
-        await new Promise((sheetsResolve) => {
+        // Explicitly load Sheets API with error handling
+        await new Promise((sheetsResolve, sheetsReject) => {
           gapi.client.load('sheets', 'v4', () => {
-            sheetsAPILoaded = true;
-            log('Sheets API initialized');
-            sheetsResolve();
+            if (gapi.client.sheets) {
+              sheetsAPILoaded = true;
+              log('Sheets API initialized');
+              sheetsResolve();
+            } else {
+              sheetsReject('Failed to load Sheets API');
+            }
           });
         });
 
@@ -65,7 +69,8 @@ async function initializeGoogleAPI() {
         }
         resolve();
       } catch (error) {
-        log(`Initialization failed: ${error.message}`);
+        log(`Initialization failed: ${error.message || error}`);
+        console.error('Initialization error:', error);
       }
     });
   });
@@ -73,25 +78,22 @@ async function initializeGoogleAPI() {
 
 // ========== SPREADSHEET OPERATIONS ========== //
 async function checkForBirthdays() {
-  if (!sheetsAPILoaded) {
-    log('Sheets API not loaded. Initializing...');
-    await initializeGoogleAPI();
-    if (!sheetsAPILoaded) {
-      log('Failed to load Sheets API');
-      return;
-    }
-  }
-
   try {
+    if (!sheetsAPILoaded || !gapi.client.sheets) {
+      throw new Error('Sheets API not available');
+    }
+
     log('Accessing spreadsheet data...');
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: SHEET_NAME
+    }).catch(error => {
+      throw new Error(`API Request Failed: ${error.result?.error?.message || error.message}`);
     });
 
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
-      row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
+      row[COLUMNS.ACTION]?.trim().toLowerCase() === 'Send'
     );
 
     log(`Found ${recipients.length} messages to send`);
