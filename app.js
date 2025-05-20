@@ -155,6 +155,11 @@ async function sendWhatsAppMessage(person) {
         }
 
         const whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
+        log(`Opening WhatsApp for ${person.name}: ${whatsappUrl}`);
+        if (!windowInstance) {
+            log(`Popup blocked! Allow popups for ${window.location.hostname}`);
+            return;
+        }
         const windowInstance = window.open(whatsappUrl, '_blank');
         
         let checkCount = 0;
