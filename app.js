@@ -72,6 +72,53 @@ async function initializeGoogleAPI() {
   });
 }
 
+// ========== BIRTHDAY CHECK FUNCTION ========== //
+async function checkForBirthdays() {
+  try {
+    log('Checking spreadsheet for birthdays...');
+    
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: SHEET_NAME
+    });
+
+    const rows = response.result.values || [];
+    const recipients = rows.slice(1).filter(row => 
+      row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
+    ).map(row => ({
+      name: row[COLUMNS.NAME],
+      phone: row[COLUMNS.PHONE],
+      salutation: row[COLUMNS.SALUTATION] || ''
+    }));
+
+    log(`Found ${recipients.length} messages to send`);
+    
+    for (const recipient of recipients) {
+      await sendWhatsAppMessage(recipient);
+      updateProgress(recipient);
+    }
+
+  } catch (error) {
+    log('Error checking birthdays: ' + error.message);
+  }
+}
+
+// ========== SCHEDULING FUNCTION ========== //
+function scheduleNextCheck() {
+  if (!isRunning) return;
+  
+  const now = new Date();
+  const [hours, minutes] = document.getElementById('checkTime').value.split(':');
+  let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+  
+  if (nextCheck <= now) nextCheck.setDate(nextCheck.getDate() + 1);
+  
+  checkInterval = setTimeout(() => {
+    checkForBirthdays();
+    scheduleNextCheck();
+  }, nextCheck - now);
+}
+
 // ========== AUTOMATION CONTROL ========== //
 function startAutomation() {
   isRunning = true;
