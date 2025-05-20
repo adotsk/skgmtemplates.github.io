@@ -149,7 +149,16 @@ function stopAutomation() {
 }
 
 // ========== MAIN INITIALIZATION ========== //
+
+// Add at top of DOMContentLoaded handler
 document.addEventListener('DOMContentLoaded', async () => {
+  // Clear storage on every reload during development
+  if (window.location.hostname === 'localhost') {
+    localStorage.clear();
+    sessionStorage.clear();
+  }
+  
+//document.addEventListener('DOMContentLoaded', async () => {
   log('Page loaded');
   await initializeGoogleAPI();
   lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
