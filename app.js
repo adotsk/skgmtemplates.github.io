@@ -8,9 +8,12 @@ const COLUMNS = { NAME: 1, PHONE: 2, SALUTATION: 7, ACTION: 8 };
 
 // ========== ESSENTIAL FUNCTIONS FIRST ========== //
 function log(message) {
+  const statusLog = document.getElementById('statusLog');
+  if (!statusLog) return;
+  
   const entry = document.createElement('div');
   entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-  document.getElementById('statusLog').appendChild(entry);
+  statusLog.appendChild(entry);
   statusLog.scrollTop = statusLog.scrollHeight;
 }
 
@@ -76,8 +79,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initializeGoogleAPI();
     lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
     
-    if (document.getElementById('autoStart').checked && 
-        localStorage.getItem('isAuthenticated') === 'true') {
+    const autoStart = document.getElementById('autoStart');
+    if (autoStart?.checked && localStorage.getItem('isAuthenticated') === 'true') {
       setTimeout(() => startAutomation(), 2000);
     }
   } catch (error) {
@@ -85,16 +88,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Modified window.onload (🚨 Sequential initialization)
-window.onload = async function() {
-  log('Page loaded');
-  try {
-    await initializeGoogleAPI();
-    lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
-    if (autoStart.checked && localStorage.getItem('isAuthenticated') === 'true') {
-      setTimeout(() => startAutomation(), 2000);
-    }
-  } catch (error) {
-    log(`Critical error: ${error.message}`);
-  }
-};
+// Remove the duplicate window.onload initialization
