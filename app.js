@@ -51,42 +51,36 @@ function initializeGoogleAPI() {
             // Initialize Google Sheets API client
             await gapi.client.init({
                 apiKey: API_KEY,
-                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-            }).then(() => {
-                log('Google API client initialized successfully');
+                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],            
             });
 
-            // Initialize Google Identity Services
+            // Initialize OAuth Client
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
-                redirect_uri: 'https://adotsk.github.io/skgmtemplates.github.io/',
+                prompt: '', // Auto-trigger silent auth
+                //redirect_uri: 'https://adotsk.github.io/skgmtemplates.github.io/',
                 callback: (tokenResponse) => {
-                    if (tokenResponse && tokenResponse.access_token) {
-                        log('OAuth token received');
+                    if (tokenResponse?.access_token) {
                         localStorage.setItem('isAuthenticated', 'true');
                         startBtn.disabled = false;
                         authenticateBtn.disabled = true;
-                        if (autoStart.checked) startAutomation();
+                        log('Silent authentication successful!');                        
                     }
                 },
                 error_callback: (error) => {
-                    log('OAuth error: ' + JSON.stringify(error));
+                    log('Authentication failed: ' + error.details);
                 }
             });
 
-            // Auto-trigger auth if not authenticated
+            // Auto-authenticate on load
             if (localStorage.getItem('isAuthenticated') !== 'true') {
-                authenticateBtn.style.display = 'block'; // Show manual auth button
-            } else {
-                startBtn.disabled = false;
+                log('Starting silent authentication...');
+                tokenClient.requestAccessToken();
             }
 
         } catch (error) {
-            // Improved error handling
-            const errorMsg = error.message || JSON.stringify(error);
-            log('Google API Error: ' + errorMsg);
-            console.error('Full error:', error);
+            log('Google API Init Error: ' + error.message);
         }
     });
 }
