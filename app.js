@@ -214,7 +214,7 @@ async function checkForBirthdays() {
         }
         
     } catch (error) {
-        log('Error checking for birthdays: ' + String(error));
+        log('Error checking for birthdays: ' + error.message);
     }
 }
 
