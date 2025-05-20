@@ -59,24 +59,43 @@ async function initializeGoogleAPI() {
           client_id: CLIENT_ID,
           scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
           prompt: 'consent',
-          callback: (tokenResponse) => {
+          include_granted_scopes: true,
+          callback: async (tokenResponse) => {
             if (tokenResponse?.access_token) {
               localStorage.setItem('isAuthenticated', 'true');
               localStorage.setItem('access_token', tokenResponse.access_token);
-              gapi.client.setToken(tokenResponse);
+              localStorage.setItem('expires_at', Date.now() + (tokenResponse.expires_in * 1000));
+              
+              gapi.client.setToken({
+                access_token: tokenResponse.access_token,
+                expires_in: tokenResponse.expires_in
+              });
+              
               updateButtonStates();
               log('Authentication successful');
+              
+              if (document.getElementById('autoStart').checked) {
+                startAutomation();
+              }
             }
           }
         });
 
-        if (localStorage.getItem('isAuthenticated') === 'true') {
+        // Check token validity
+        const expiresAt = localStorage.getItem('expires_at');
+        if (localStorage.getItem('isAuthenticated') === 'true' && expiresAt > Date.now()) {
           gapi.client.setToken({
-            access_token: localStorage.getItem('access_token')
+            access_token: localStorage.getItem('access_token'),
+            expires_in: (expiresAt - Date.now()) / 1000
           });
           log('Session restored');
           updateButtonStates();
+        } else {
+          localStorage.removeItem('isAuthenticated');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('expires_at');
         }
+        
         resolve();
       } catch (error) {
         log(`Initialization failed: ${error.message || error}`);
@@ -90,6 +109,11 @@ async function checkForBirthdays() {
   try {
     if (!sheetsAPILoaded || !gapi.client.sheets) {
       throw new Error('Sheets API not available');
+    }
+
+    // Verify valid token
+    if (!gapi.client.getToken()?.access_token || localStorage.getItem('expires_at') < Date.now()) {
+      throw new Error('Authentication required');
     }
 
     log('Accessing spreadsheet data...');
@@ -111,8 +135,14 @@ async function checkForBirthdays() {
     }
 
   } catch (error) {
-    log(`Critical Error: ${error.result?.error?.message || error.message}`);
-    console.error('API Error Details:', error);
+    log(`API Error: ${error.result?.error?.message || error.message}`);
+    if (error.result?.error?.status === 'UNAUTHENTICATED') {
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('expires_at');
+      updateButtonStates();
+      log('Session expired. Please re-authenticate.');
+    }
     stopAutomation();
   }
 }
