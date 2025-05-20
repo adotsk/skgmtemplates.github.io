@@ -21,14 +21,7 @@ let tokenClient;
 let checkInterval;
 let isRunning = false;
 let lastCheckedDate = '';
-
-// ========== BUTTON STATE MANAGEMENT ========== //
-function updateButtonStates() {
-  const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-  document.getElementById('authenticateBtn').disabled = isAuth;
-  document.getElementById('startBtn').disabled = !isAuth || isRunning;
-  document.getElementById('stopBtn').disabled = !isRunning;
-}
+let sheetsAPILoaded = false;
 
 // ========== GOOGLE API INITIALIZATION ========== //
 async function initializeGoogleAPI() {
@@ -39,14 +32,14 @@ async function initializeGoogleAPI() {
         await gapi.client.init({});
         log('Google API core initialized');
 
-        // Load Sheets API explicitly
-        await gapi.client.load(
-          'https://sheets.googleapis.com/$discovery/rest?version=v4',
-          () => {
-            log('Sheets API successfully loaded');
-            resolve();
-          }
-        );
+        // Explicitly load Sheets API
+        await new Promise((sheetsResolve) => {
+          gapi.client.load('sheets', 'v4', () => {
+            sheetsAPILoaded = true;
+            log('Sheets API initialized');
+            sheetsResolve();
+          });
+        });
 
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
@@ -70,6 +63,7 @@ async function initializeGoogleAPI() {
           log('Session restored');
           updateButtonStates();
         }
+        resolve();
       } catch (error) {
         log(`Initialization failed: ${error.message}`);
       }
@@ -79,10 +73,13 @@ async function initializeGoogleAPI() {
 
 // ========== SPREADSHEET OPERATIONS ========== //
 async function checkForBirthdays() {
-  if (!gapi.client.sheets) {
-    log('Error: Sheets API not loaded. Reinitializing...');
+  if (!sheetsAPILoaded) {
+    log('Sheets API not loaded. Initializing...');
     await initializeGoogleAPI();
-    return;
+    if (!sheetsAPILoaded) {
+      log('Failed to load Sheets API');
+      return;
+    }
   }
 
   try {
@@ -95,18 +92,11 @@ async function checkForBirthdays() {
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
       row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
-    ).map(row => ({
-      name: row[COLUMNS.NAME],
-      phone: row[COLUMNS.PHONE],
-      salutation: row[COLUMNS.SALUTATION] || ''
-    }));
+    );
 
     log(`Found ${recipients.length} messages to send`);
     
-    for (const recipient of recipients) {
-      await sendWhatsAppMessage(recipient);
-      updateProgress(recipient);
-    }
+    // Add your message sending logic here
 
   } catch (error) {
     log(`API Error: ${error.result?.error?.message || error.message}`);
