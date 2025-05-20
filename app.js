@@ -101,8 +101,9 @@ async function checkForBirthdays() {
     // Add your message sending logic here
 
   } catch (error) {
-    log(`API Error: ${error.result?.error?.message || error.message}`);
-    console.error('Full error:', error);
+    log(`Critical Error: ${error.message}`);
+    console.error('Full error trace:', error);
+    stopAutomation(); // Auto-stop on error
   }
 }
 
@@ -183,7 +184,17 @@ function stopAutomation() {
 // ========== MAIN INITIALIZATION ========== //
 document.addEventListener('DOMContentLoaded', async () => {
   log('Page loaded');
-  await initializeGoogleAPI();
+  try {
+    await initializeGoogleAPI();
+    setInterval(() => {
+      if (!sheetsAPILoaded) {
+        log('Reinitializing Sheets API...');
+        initializeGoogleAPI();
+      }
+    }, 5000); // Check API status every 5 seconds
+  } catch (error) {
+    log(`Fatal initialization error: ${error.message}`);
+  }
   
   // Event listeners
   document.getElementById('authenticateBtn').addEventListener('click', () => {
