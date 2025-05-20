@@ -72,13 +72,17 @@
                     <input type="text" class="form-control" id="nameColumn" placeholder="e.g. A" value="A">
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="phoneColumn" class="form-label">Phone Column</label>
-                    <input type="text" class="form-control" id="phoneColumn" placeholder="e.g. B" value="B">
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="phoneColumn" class="form-label">Phone Column</label>
+                        <input type="text" class="form-control" id="phoneColumn" placeholder="e.g. B" value="B">
+                        <div class="form-text">Note: Receiver names are automatically taken from <strong>Column B</strong>.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
         <div class="row mb-4">
             <div class="col-md-6">
@@ -94,18 +98,14 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="row mb-4">
+            <div class="col-md-6">
                 <div class="mb-3">
                     <label for="actionColumn" class="form-label">Action Column</label>
                     <input type="text" class="form-control" id="actionColumn" placeholder="e.g. E" value="E">
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="mb-3">
-                    <label for="receiverNameColumn" class="form-label">Receiver Name Column</label>
-                    <input type="text" class="form-control" id="receiverNameColumn" placeholder="e.g. F" value="F">
-                </div>
-            </div>        
+        </div>
         <div class="mb-4">
             <label for="messageTemplate" class="form-label">Message Template</label>
             <textarea class="form-control" id="messageTemplate" rows="3" placeholder="Enter your message template. Use {name} and {salutation} as placeholders.">Happy Birthday {salutation} {name}! Wishing you a wonderful day filled with joy and happiness.</textarea>
