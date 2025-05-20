@@ -115,6 +115,10 @@ async function checkForBirthdays() {
         });
 
         log('Spreadsheet data fetched successfully');
+        
+        log(`First row sample: ${JSON.stringify(rows[1])}`); // Add after fetching data
+        log(`Action column value: ${rows[1][COLUMNS.ACTION]}`); // Verify "Send" detection
+        
         log(`Raw response: ${JSON.stringify(response.result.values)}`);
         
         const rows = response.result.values || [];
@@ -193,7 +197,7 @@ function scheduleNextCheck() {
     let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
     if (nextCheck <= now) nextCheck.setDate(nextCheck.getDate() + 1);
     checkInterval = setTimeout(() => {
-        checkForBirthdays();
+        ;
         scheduleNextCheck();
     }, nextCheck - now);
 }
