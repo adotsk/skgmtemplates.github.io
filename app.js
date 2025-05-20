@@ -60,6 +60,7 @@ function initializeGoogleAPI() {
             tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
+                redirect_uri: 'https://adotsk.github.io/skgmtemplates.github.io/',
                 callback: (tokenResponse) => {
                     if (tokenResponse && tokenResponse.access_token) {
                         log('OAuth token received');
@@ -76,10 +77,8 @@ function initializeGoogleAPI() {
 
             // Auto-trigger auth if not authenticated
             if (localStorage.getItem('isAuthenticated') !== 'true') {
-                log('Initiating OAuth flow...');
-                tokenClient.requestAccessToken({prompt: 'consent'});
+                authenticateBtn.style.display = 'block'; // Show manual auth button
             } else {
-                authenticateBtn.disabled = true;
                 startBtn.disabled = false;
             }
 
