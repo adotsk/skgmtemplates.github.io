@@ -30,7 +30,7 @@ window.onload = function() {
      // Initialize lastCheckedDate to prevent undefined errors
     lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
     
-    if (autoStart.checked && localStorage.getItem('isAuthenticated') === 'true') {
+    if (autoStart.checked || localStorage.getItem('isAuthenticated') === 'true') {
         setTimeout(() => startAutomation(), 2000);
     }
 };
