@@ -74,17 +74,22 @@ function initializeGoogleAPI() {
 
 // ========== MAIN INITIALIZATION ========== //
 document.addEventListener('DOMContentLoaded', async () => {
-  log('Page loaded');
+  // Wait for Google APIs to load
+  await new Promise(resolve => {
+    if (window.gapi) resolve();
+    window.gapiOnLoad = resolve;
+  });
+
+  // Initialize authentication
   try {
     await initializeGoogleAPI();
-    lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
+    log('Authentication system ready');
     
-    const autoStart = document.getElementById('autoStart');
-    if (autoStart?.checked && localStorage.getItem('isAuthenticated') === 'true') {
-      setTimeout(() => startAutomation(), 2000);
+    if (localStorage.getItem('isAuthenticated') === 'true') {
+      startAutomation();
     }
   } catch (error) {
-    log(`Critical error: ${error.message}`);
+    log(`Initialization error: ${error.message}`);
   }
 });
 
