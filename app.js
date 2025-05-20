@@ -165,6 +165,18 @@ function updateProgress(recipient) {
   progressLog.scrollTop = progressLog.scrollHeight;
 }
 
+function updateButtonStates() {
+  const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+  const sheetsReady = sheetsAPILoaded && gapi.client.sheets;
+  
+  document.getElementById('authenticateBtn').disabled = isAuth;
+  document.getElementById('startBtn').disabled = !isAuth || !sheetsReady || isRunning;
+  document.getElementById('stopBtn').disabled = !isRunning;
+  
+  // Visual feedback
+  document.getElementById('startBtn').title = sheetsReady ? '' : 'Waiting for Sheets API';
+}
+
 // ========== AUTOMATION CONTROL ========== //
 function startAutomation() {
   isRunning = true;
