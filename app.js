@@ -112,7 +112,7 @@ async function checkForBirthdays() {
 
   } catch (error) {
     log(`Critical Error: ${error.result?.error?.message || error.message}`);
-    console.error('Full error trace:', error);
+    console.error('API Error Details:', error);
     stopAutomation();
   }
 }
