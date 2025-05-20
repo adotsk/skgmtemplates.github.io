@@ -36,43 +36,46 @@ async function initializeGoogleAPI() {
   return new Promise((resolve) => {
     gapi.load('client', async () => {
       try {
-        // Initialize without API key
-        await gapi.client.init({
-          discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-        });
-        
+        await gapi.client.init({}); // No API key needed
+        log('Google Sheets API initialized');
+
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
           scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
           prompt: 'consent',
           callback: async (tokenResponse) => {
             if (tokenResponse?.access_token) {
-              // Set the access token for gapi requests
-              gapi.client.setToken(tokenResponse);
+              // Store token details
+              localStorage.setItem('access_token', tokenResponse.access_token);
+              localStorage.setItem('expires_at', Date.now() + (tokenResponse.expires_in * 1000));
               
+              // Set token for all API requests
+              gapi.client.setToken({
+                access_token: tokenResponse.access_token,
+                expires_in: tokenResponse.expires_in
+              });
+
               localStorage.setItem('isAuthenticated', 'true');
               updateButtonStates();
               log('Authentication successful');
-              
-              if (document.getElementById('autoStart').checked) {
-                startAutomation();
-              }
             }
           }
         });
 
-        if (localStorage.getItem('isAuthenticated') !== 'true') {
-          log('Starting authentication flow...');
-          tokenClient.requestAccessToken();
-        } else {
-          // Restore existing token
+        // Restore session if valid token exists
+        if (localStorage.getItem('access_token') && 
+            Date.now() < localStorage.getItem('expires_at')) {
           gapi.client.setToken({
             access_token: localStorage.getItem('access_token'),
-            expires_in: localStorage.getItem('expires_in')
+            expires_in: (localStorage.getItem('expires_at') - Date.now()) / 1000
           });
-          log('Already authenticated');
+          log('Session restored');
           updateButtonStates();
+        } else {
+          log('Starting authentication flow...');
+          tokenClient.requestAccessToken();
         }
+
         resolve();
       } catch (error) {
         log(`Initialization failed: ${error.message}`);
