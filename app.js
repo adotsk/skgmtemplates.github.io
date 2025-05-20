@@ -9,10 +9,7 @@ const COLUMNS = { NAME: 1, PHONE: 2, SALUTATION: 7, ACTION: 8 };
 // ========== ESSENTIAL FUNCTIONS FIRST ========== //
 function log(message) {
   const statusLog = document.getElementById('statusLog');
-  if (!statusLog) {
-    console.error('Status log container missing!');
-    return;
-  }
+  if (!statusLog) return;
   
   const entry = document.createElement('div');
   entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
@@ -25,35 +22,38 @@ let tokenClient;
 let checkInterval;
 let isRunning = false;
 let lastCheckedDate = '';
-let gapiInitialized = false;
+
+// ========== BUTTON STATE MANAGEMENT ========== //
+function updateButtonStates() {
+  const isAuth = localStorage.getItem('isAuthenticated') === 'true';
+  document.getElementById('authenticateBtn').disabled = isAuth;
+  document.getElementById('startBtn').disabled = !isAuth || isRunning;
+  document.getElementById('stopBtn').disabled = !isRunning;
+}
 
 // ========== GOOGLE API INITIALIZATION ========== //
-function initializeGoogleAPI() {
-  return new Promise((resolve, reject) => {
+async function initializeGoogleAPI() {
+  return new Promise((resolve) => {
     gapi.load('client', async () => {
       try {
         await gapi.client.init({
           apiKey: API_KEY,
           discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
         });
-        log('Google Sheets API initialized');
-
+        
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
-          redirect_uri: 'https://adotsk.github.io/skgmtemplates.github.io/',
           scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
           prompt: 'consent',
           callback: (tokenResponse) => {
             if (tokenResponse?.access_token) {
               localStorage.setItem('isAuthenticated', 'true');
-              document.getElementById('startBtn').disabled = false;
-              document.getElementById('authenticateBtn').disabled = true;
+              updateButtonStates();
               log('Authentication successful');
-              if (document.getElementById('autoStart').checked) startAutomation();
+              if (document.getElementById('autoStart').checked) {
+                startAutomation();
+              }
             }
-          },
-          error_callback: (error) => {
-            log(`OAuth Error: ${error.type} - ${error.message}`);
           }
         });
 
@@ -62,38 +62,46 @@ function initializeGoogleAPI() {
           tokenClient.requestAccessToken();
         } else {
           log('Already authenticated');
-          document.getElementById('startBtn').disabled = false;
+          updateButtonStates();
         }
-
-        gapiInitialized = true;
         resolve();
       } catch (error) {
         log(`Initialization failed: ${error.message}`);
-        reject(error);
       }
     });
   });
 }
 
+// ========== AUTOMATION CONTROL ========== //
+function startAutomation() {
+  isRunning = true;
+  updateButtonStates();
+  log('Automation started!');
+  checkForBirthdays();
+  scheduleNextCheck();
+}
+
+function stopAutomation() {
+  isRunning = false;
+  clearTimeout(checkInterval);
+  updateButtonStates();
+  log('Automation stopped.');
+}
+
 // ========== MAIN INITIALIZATION ========== //
 document.addEventListener('DOMContentLoaded', async () => {
-  // Wait for Google APIs to load
-  await new Promise(resolve => {
-    if (window.gapi) resolve();
-    window.gapiOnLoad = resolve;
+  log('Page loaded');
+  await initializeGoogleAPI();
+  lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
+  
+  // Event listeners for buttons
+  document.getElementById('authenticateBtn').addEventListener('click', () => {
+    tokenClient.requestAccessToken();
   });
 
-  // Initialize authentication
-  try {
-    await initializeGoogleAPI();
-    log('Authentication system ready');
-    
-    if (localStorage.getItem('isAuthenticated') === 'true') {
-      startAutomation();
-    }
-  } catch (error) {
-    log(`Initialization error: ${error.message}`);
-  }
-});
+  document.getElementById('startBtn').addEventListener('click', startAutomation);
+  document.getElementById('stopBtn').addEventListener('click', stopAutomation);
 
-// Remove the duplicate window.onload initialization
+  // Initial button state
+  updateButtonStates();
+});
