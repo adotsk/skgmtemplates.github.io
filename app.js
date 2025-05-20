@@ -28,6 +28,7 @@ function initializeGoogleAPI() {
         // Step 2: Initialize OAuth client
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
+          redirect_uri: 'https://adotsk.github.io/skgmtemplates.github.io/',
           scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
           prompt: 'consent', // 🚨 Force consent screen for first-time users
           callback: (tokenResponse) => {
