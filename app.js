@@ -36,9 +36,14 @@ async function initializeGoogleAPI() {
   return new Promise((resolve) => {
     gapi.load('client', async () => {
       try {
-        await gapi.client.init({}); // No API key needed
-        log('Google Sheets API initialized');
+        // Initialize core client
+        await gapi.client.init({});
+        log('Google API core initialized');
 
+        // Load Sheets API specifically
+        await gapi.client.load('https://sheets.googleapis.com/$discovery/rest?version=v4');
+        log('Sheets API loaded');
+        
         tokenClient = google.accounts.oauth2.initTokenClient({
           client_id: CLIENT_ID,
           scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
@@ -87,8 +92,11 @@ async function initializeGoogleAPI() {
 // ========== BIRTHDAY CHECK FUNCTION ========== //
 async function checkForBirthdays() {
   try {
-    log('Checking spreadsheet for birthdays...');
-    
+    if (!gapi.client.sheets) {
+      throw new Error('Sheets API not loaded');
+    }
+
+    log('Accessing spreadsheet...');    
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId: SPREADSHEET_ID,
       range: SHEET_NAME,
@@ -114,7 +122,7 @@ async function checkForBirthdays() {
 
   } catch (error) {
     log(`API Error: ${error.result?.error?.message || error.message}`);
-    console.error('Full error details:', error);
+    console.error('API Error Details:', error);
   }
 }
 
