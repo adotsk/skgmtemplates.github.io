@@ -66,35 +66,53 @@
         </div>
     </div>
 
-    <!-- Google API -->
+        <!-- Google API Initialization Scripts -->
     <script>
-    window.handleGapiLoad = () => {
-        if (!window.gapi) {
-            console.error('gapi failed to load!');
-            return;
-        }
-        window.gapiOnLoad();
-    };
+        // 1. Define initialization functions FIRST
+        window.gapiOnLoad = () => {
+            console.log('Google Sheets API initialized');
+            if (typeof initializeGoogleAPI === 'function') {
+                initializeGoogleAPI();
+            }
+        };
+
+        window.gisOnLoad = () => {
+            console.log('Google Identity Services initialized');
+        };
+
+        // 2. Error handlers
+        window.handleGapiLoad = () => {
+            if (!window.gapi) {
+                console.error('gapi failed to load!');
+                return;
+            }
+            gapiOnLoad(); // Call defined function
+        };
+
+        window.handleGisLoad = () => {
+            if (!window.google) {
+                console.error('GIS failed to load!');
+                return;
+            }
+            gisOnLoad(); // Call defined function
+        };
     </script>
+
+    <!-- 3. Load Google APIs -->
     <script 
         src="https://apis.google.com/js/api.js" 
         onload="handleGapiLoad()" 
         onerror="console.error('Failed to load gapi!')">
     </script>
     
-    <script>
-        window.handleGisLoad = () => {
-            if (!window.google) {
-                console.error('GIS failed to load!');
-                return;
-            }
-            window.gisOnLoad();
-        };
-    </script>
     <script 
         src="https://accounts.google.com/gsi/client" 
         onload="handleGisLoad()" 
         onerror="console.error('Failed to load GIS!')">
     </script>
+
+    <!-- App Script -->
+    <script src="app.js"></script>
+
 </body>
 </html>
