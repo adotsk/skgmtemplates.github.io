@@ -6,6 +6,14 @@ const CLIENT_ID = '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleuserc
 const COLUMNS = { NAME: 1, PHONE: 2, SALUTATION: 7, ACTION: 8 };
 // ============================================ //
 
+// Logging Utility (Moved to top)
+function log(message) {
+  const entry = document.createElement('div');
+  entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+  statusLog.appendChild(entry);
+  statusLog.scrollTop = statusLog.scrollHeight;
+}
+
 // Global Variables
 let tokenClient;
 let checkInterval;
