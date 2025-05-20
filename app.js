@@ -6,22 +6,22 @@ const CLIENT_ID = '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleuserc
 const COLUMNS = { NAME: 1, PHONE: 2, SALUTATION: 7, ACTION: 8 };
 // ============================================ //
 
-// Logging Utility (Moved to top)
+// ========== ESSENTIAL FUNCTIONS FIRST ========== //
 function log(message) {
   const entry = document.createElement('div');
   entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-  statusLog.appendChild(entry);
+  document.getElementById('statusLog').appendChild(entry);
   statusLog.scrollTop = statusLog.scrollHeight;
 }
 
-// Global Variables
+// ========== GLOBAL VARIABLES ========== //
 let tokenClient;
 let checkInterval;
 let isRunning = false;
 let lastCheckedDate = '';
 let gapiInitialized = false;
 
-// Initialize Google API
+// ========== GOOGLE API INITIALIZATION ========== //
 function initializeGoogleAPI() {
   return new Promise((resolve, reject) => {
     gapi.load('client', async () => {
@@ -40,10 +40,10 @@ function initializeGoogleAPI() {
           callback: (tokenResponse) => {
             if (tokenResponse?.access_token) {
               localStorage.setItem('isAuthenticated', 'true');
-              startBtn.disabled = false;
-              authenticateBtn.disabled = true;
+              document.getElementById('startBtn').disabled = false;
+              document.getElementById('authenticateBtn').disabled = true;
               log('Authentication successful');
-              if (autoStart.checked) startAutomation();
+              if (document.getElementById('autoStart').checked) startAutomation();
             }
           },
           error_callback: (error) => {
@@ -56,7 +56,7 @@ function initializeGoogleAPI() {
           tokenClient.requestAccessToken();
         } else {
           log('Already authenticated');
-          startBtn.disabled = false;
+          document.getElementById('startBtn').disabled = false;
         }
 
         gapiInitialized = true;
@@ -69,14 +69,15 @@ function initializeGoogleAPI() {
   });
 }
 
-// Modified initialization using DOMContentLoaded
+// ========== MAIN INITIALIZATION ========== //
 document.addEventListener('DOMContentLoaded', async () => {
   log('Page loaded');
   try {
     await initializeGoogleAPI();
     lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
     
-    if (autoStart.checked && localStorage.getItem('isAuthenticated') === 'true') {
+    if (document.getElementById('autoStart').checked && 
+        localStorage.getItem('isAuthenticated') === 'true') {
       setTimeout(() => startAutomation(), 2000);
     }
   } catch (error) {
