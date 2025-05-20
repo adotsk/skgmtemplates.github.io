@@ -26,6 +26,10 @@ const autoStart = document.getElementById('autoStart');
 // Initialize on Load
 window.onload = function() {
     initializeGoogleAPI();
+
+     // Initialize lastCheckedDate to prevent undefined errors
+    lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
+    
     if (autoStart.checked && localStorage.getItem('isAuthenticated') === 'true') {
         setTimeout(() => startAutomation(), 2000);
     }
@@ -44,11 +48,15 @@ function initializeGoogleAPI() {
                 client_id: '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleusercontent.com',
                 scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
                 callback: (tokenResponse) => {
-                    if (tokenResponse?.access_token) {
-                        localStorage.setItem('isAuthenticated', 'true');
-                        startBtn.disabled = false;
-                        authenticateBtn.disabled = true;
-                        log('Google authentication successful!');
+                if (tokenResponse?.access_token) {
+                    localStorage.setItem('isAuthenticated', 'true');
+                    startBtn.disabled = false;
+                    authenticateBtn.disabled = true;
+                    log('Google Authentication Successful!');
+
+                    // Only auto-start AFTER successful auth
+                    if (autoStart.checked) {
+                        startAutomation();
                     }
                 }
             });
@@ -121,7 +129,8 @@ async function checkForBirthdays() {
             updateProgress(recipient);
         }
     } catch (error) {
-        log('Full error object: ' + JSON.stringify(error)); // Critical for debugging
+        log('Error: ' + (error.message || error)); // Handle undefined messages
+        console.error(error); // Add console logging
     }
 }
 
