@@ -113,7 +113,8 @@ async function checkForBirthdays() {
     }
 
   } catch (error) {
-    log('Error checking birthdays: ' + error.message);
+    log(`API Error: ${error.result?.error?.message || error.message}`);
+    console.error('Full error details:', error);
   }
 }
 
@@ -152,6 +153,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   log('Page loaded');
   await initializeGoogleAPI();
   lastCheckedDate = localStorage.getItem('lastCheckedDate') || '';
+  // Add with other DOM elements
+  const clearStorageBtn = document.getElementById('clearStorageBtn');
   
   // Event listeners for buttons
   document.getElementById('authenticateBtn').addEventListener('click', () => {
@@ -160,6 +163,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('startBtn').addEventListener('click', startAutomation);
   document.getElementById('stopBtn').addEventListener('click', stopAutomation);
+
+  // Add with other event listeners
+clearStorageBtn.addEventListener('click', () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  log('All app data cleared. Reloading...');
+  setTimeout(() => location.reload(), 1000);
+});
 
   // Initial button state
   updateButtonStates();
