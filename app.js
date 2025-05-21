@@ -124,8 +124,8 @@ async function checkForBirthdays() {
 
     const rows = response.result.values || [];
     // DEBUG: Log header and first data row
-    log(`Headers: ${rows[0]?.join(', ') || 'No headers found'}`);
-    log(`First row: ${rows[1]?.join(', ') || 'No data rows'}`);
+    //log(`Headers: ${rows[0]?.join(', ') || 'No headers found'}`);
+    //log(`First row: ${rows[1]?.join(', ') || 'No data rows'}`);
     
     const recipients = rows.slice(1).filter(row => {
         // Ensure row has enough columns and check ACTION value
@@ -161,15 +161,19 @@ function scheduleNextCheck() {
   const now = new Date();
   const [checkHours, checkMinutes] = document.getElementById('checkTime').value.split(':');
   
-  // Always set next check to TOMORROW's target time
-  const nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), checkHours, checkMinutes);
-  nextCheck.setDate(nextCheck.getDate() + 1);
+  // Create target time for TODAY
+  let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), checkHours, checkMinutes);
+  
+  // If target time already passed today, schedule for tomorrow
+  if (nextCheck <= now) {
+    nextCheck.setDate(nextCheck.getDate() + 1);
+  }
 
   const delay = nextCheck - now;
   
   checkInterval = setTimeout(() => {
-    checkForBirthdays();
-    scheduleNextCheck(); // Re-schedule after completion
+    checkForBirthdays(); // Execute immediately when time matches
+    scheduleNextCheck(); // Schedule next day's check AFTER execution
   }, delay);
 
   log(`Next check scheduled at ${nextCheck.toLocaleTimeString()}`);
