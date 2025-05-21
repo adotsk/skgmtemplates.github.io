@@ -182,9 +182,9 @@ async function WhatsAppMessage(row) {
       .replace('{name}', name)
       .replace('{salutation}', salutation);
 
-    const formattedPhone = phone.replace(/[^\d+]/g, ''); // Keep digits and '+'
+    const formattedPhone = phone.replace(/[^\d+]/g, '');
     if (!formattedPhone.startsWith('+')) {
-      log(`Invalid phone number: ${formattedPhone}`); // Log the sanitized number
+      log(`Invalid phone number: ${formattedPhone}`); // Log the cleaned number
       return;
     }
 
