@@ -129,8 +129,7 @@ async function checkForBirthdays() {
     
     const recipients = rows.slice(1).filter(row => 
         // Ensure row has enough columns and check ACTION value
-      return row.length >= COLUMNS.ACTION && 
-             row[COLUMNS.ACTION]?.trim().toLowerCase() === 'Send';
+      return row.length >= COLUMNS.ACTION && row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send';
         //row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send' // Zero-based index
     );
 
