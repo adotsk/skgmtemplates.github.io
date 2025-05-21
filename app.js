@@ -124,8 +124,8 @@ async function checkForBirthdays() {
 
     const rows = response.result.values || [];
     // DEBUG: Log header and first data row
-    //log(`Headers: ${rows[0]?.join(', ') || 'No headers found'}`);
-    //log(`First row: ${rows[1]?.join(', ') || 'No data rows'}`);
+    log(`Headers: ${rows[0]?.join(', ') || 'No headers found'}`);
+    log(`First row: ${rows[1]?.join(', ') || 'No data rows'}`);
     
     const recipients = rows.slice(1).filter(row => {
         // Ensure row has enough columns and check ACTION value
