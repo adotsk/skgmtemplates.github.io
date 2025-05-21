@@ -124,13 +124,13 @@ async function checkForBirthdays() {
 
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
-      row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'send' // Zero-based index
+      row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send' // Zero-based index
     );
 
-    log(`Found ${recipients.length} messages to send`);
+    log(`Found ${recipients.length} messages to Send`);
     
     for (const recipient of recipients) {
-      await sendWhatsAppMessage(recipient);
+      await SendWhatsAppMessage(recipient);
       updateProgress(recipient);
     }
 
