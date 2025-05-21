@@ -205,35 +205,60 @@ function scheduleNextCheck() {
 // ========== WHATSAPP INTEGRATION ========== //
 async function WhatsAppMessage(row) {
   try {
-    // Extract data with zero-based indices and default values
-    const name = row[COLUMNS.NAME -1] || '';
-    const phone = row[COLUMNS.PHONE -1] || '';
-    const salutation = row[COLUMNS.SALUTATION -1] || '';
+    // Extract data with zero-based indices
+    const name = row[COLUMNS.NAME - 1] || '';
+    const phone = row[COLUMNS.PHONE - 1] || '';
+    const salutation = row[COLUMNS.SALUTATION - 1] || '';
 
+    // Validate and format phone number
+    const formattedPhone = phone.replace(/[^\d+]/g, '');
+    if (!formattedPhone.startsWith('+')) {
+      log(`Invalid phone number format: ${formattedPhone}`);
+      return;
+    }
+
+    // Construct message with template
     const message = document.getElementById('messageTemplate').value
       .replace('{name}', name)
       .replace('{salutation}', salutation);
 
-    const formattedPhone = phone.replace(/[^\d+]/g, '');
-    if (!formattedPhone.startsWith('+')) {
-      log(`Invalid phone number: ${formattedPhone}`); // Log the cleaned number
+    // Create WhatsApp deep link
+    const whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
+    
+    // Try to use existing "WhatsApp" tab or create new one
+    const whatsappWindow = window.open(whatsappUrl, 'WhatsApp');
+    
+    if (!whatsappWindow || whatsappWindow.closed) {
+      log('Allow popups and keep WhatsApp Web tab open!');
       return;
     }
 
-    const whatsappUrl = `https://web.whatsapp.com/?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
-    
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = whatsappUrl;
-    document.body.appendChild(iframe);
-    
-    log(`Message queued for ${name}`);
+    // Focus the existing tab
+    setTimeout(() => {
+      try {
+        whatsappWindow.focus();
+        log(`Message ready to send to ${name} - Press ENTER in WhatsApp tab`);
+        
+        // Auto-send attempt (works only if same origin)
+        setTimeout(() => {
+          const enterEvent = new KeyboardEvent('keydown', {
+            key: 'Enter',
+            code: 'Enter',
+            keyCode: 13,
+            bubbles: true
+          });
+          whatsappWindow.document.dispatchEvent(enterEvent);
+        }, 3000);
+        
+      } catch (error) {
+        log('Security restriction: Please manually press ENTER');
+      }
+    }, 2000);
 
   } catch (error) {
     log(`Send Error: ${error.message}`);
   }
 }
-
 // ========== PROGRESS DISPLAY ========== //
 function updateProgress(row) {
   const progressLog = document.getElementById('progressLog');
@@ -271,6 +296,16 @@ function stopAutomation() {
 
 // ========== MAIN INITIALIZATION ========== //
 document.addEventListener('DOMContentLoaded', async () => {
+  // WhatsApp initialization warning (runs FIRST)
+  if (!window.OTPWarningShown) {
+    alert(`Enable these settings:
+1. Keep WhatsApp Web open in a background tab
+2. Disable popup blockers for this site
+3. Stay logged into WhatsApp Web`);
+    window.OTPWarningShown = true;
+  }
+
+  // Original initialization flow
   log('Page loaded');
   try {
     await initializeGoogleAPI();
@@ -283,7 +318,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     log(`Fatal initialization error: ${error.message}`);
   }
-  
+
+  // Event listeners
   document.getElementById('authenticateBtn').addEventListener('click', () => {
     tokenClient.requestAccessToken();
   });
