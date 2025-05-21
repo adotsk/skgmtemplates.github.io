@@ -124,13 +124,13 @@ async function checkForBirthdays() {
 
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
-      row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send' // Zero-based index
+      row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'send' // Zero-based index
     );
 
-    log(`Found ${recipients.length} messages to Send`);
+    log(`Found ${recipients.length} messages to send`);
     
     for (const recipient of recipients) {
-      await SendWhatsAppMessage(recipient);
+      await sendWhatsAppMessage(recipient);
       updateProgress(recipient);
     }
 
@@ -252,4 +252,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('stopBtn').addEventListener('click', stopAutomation);
 
   updateButtonStates();
-})
+});
