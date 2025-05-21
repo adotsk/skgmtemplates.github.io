@@ -252,4 +252,4 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('stopBtn').addEventListener('click', stopAutomation);
 
   updateButtonStates();
-});
+})
