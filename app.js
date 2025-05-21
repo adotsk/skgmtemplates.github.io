@@ -127,11 +127,12 @@ async function checkForBirthdays() {
     log(`Headers: ${rows[0]?.join(', ') || 'No headers found'}`);
     log(`First row: ${rows[1]?.join(', ') || 'No data rows'}`);
     
-    const recipients = rows.slice(1).filter(row => 
+    const recipients = rows.slice(1).filter(row => {
         // Ensure row has enough columns and check ACTION value
-      return row.length >= COLUMNS.ACTION && row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send';
+      return row.length >= COLUMNS.ACTION -1 && 
+        row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send';
         //row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send' // Zero-based index
-    );
+    });
 
     log(`Found ${recipients.length} messages to send`);
     
