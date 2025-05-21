@@ -129,9 +129,8 @@ async function checkForBirthdays() {
     
     const recipients = rows.slice(1).filter(row => {
         // Ensure row has enough columns and check ACTION value
-      return row.length >= 8 && //COLUMNS.ACTION && 
-        row[8]?.trim() === 'Send'; //.toLowerCase() === 'Send';
-        //row[COLUMNS.ACTION]?.trim() === 'Send'; //.toLowerCase() === 'Send';
+      return row.length >= COLUMNS.ACTION -1 &&         
+        row[COLUMNS.ACTION -1]?.trim() === 'Send'; //.toLowerCase() === 'Send';
         //row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send' // Zero-based index
     });
 
@@ -175,9 +174,9 @@ function scheduleNextCheck() {
 async function WhatsAppMessage(row) {
   try {
     // Extract data with zero-based indices and default values
-    const name = row[1] || ''; //COLUMNS.NAME] || '';
-    const phone = row[2] || ''; //COLUMNS.PHONE] || '';
-    const salutation = row[7] || ''; //COLUMNS.SALUTATION] || '';
+    const name = row[COLUMNS.NAME -1] || '';
+    const phone = row[COLUMNS.PHONE -1] || '';
+    const salutation = row[COLUMNS.SALUTATION -1] || '';
 
     const message = document.getElementById('messageTemplate').value
       .replace('{name}', name)
@@ -208,8 +207,8 @@ function updateProgress(row) {
   const progressLog = document.getElementById('progressLog');
   if (!progressLog) return;
   
-  const name = row[1] || 'Unknown'; //COLUMNS.NAME] || 'Unknown';
-  const phone = row[2] || 'No number'; //COLUMNS.PHONE] || 'No number';
+  const name = row[COLUMNS.NAME -1] || 'Unknown';
+  const phone = row[COLUMNS.PHONE -1] || 'No number';
   
   const entry = document.createElement('div');
   entry.innerHTML = `
