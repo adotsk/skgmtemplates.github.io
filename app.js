@@ -184,7 +184,7 @@ async function WhatsAppMessage(row) {
 
     const formattedPhone = phone.replace(/\D/g, '');
     if (!formattedPhone.startsWith('+')) {
-      log(`Invalid phone number: ${name}`);
+      log(`Invalid phone number: ${phone}`);
       return;
     }
 
