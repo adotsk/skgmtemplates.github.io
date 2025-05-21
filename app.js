@@ -137,7 +137,7 @@ async function checkForBirthdays() {
     log(`Found ${recipients.length} messages to send`);
     
     for (const recipient of recipients) {
-      await sendWhatsAppMessage(recipient);
+      await WhatsAppMessage(recipient);
       updateProgress(recipient);
     }
 
