@@ -174,9 +174,9 @@ function scheduleNextCheck() {
 async function WhatsAppMessage(row) {
   try {
     // Extract data with zero-based indices and default values
-    const name = row[COLUMNS.NAME - 1] || '';
-    const phone = row[COLUMNS.PHONE - 1] || '';
-    const salutation = row[COLUMNS.SALUTATION - 1] || '';
+    const name = row[COLUMNS.NAME] || '';
+    const phone = row[COLUMNS.PHONE] || '';
+    const salutation = row[COLUMNS.SALUTATION] || '';
 
     const message = document.getElementById('messageTemplate').value
       .replace('{name}', name)
@@ -207,8 +207,8 @@ function updateProgress(row) {
   const progressLog = document.getElementById('progressLog');
   if (!progressLog) return;
   
-  const name = row[COLUMNS.NAME - 1] || 'Unknown';
-  const phone = row[COLUMNS.PHONE - 1] || 'No number';
+  const name = row[COLUMNS.NAME] || 'Unknown';
+  const phone = row[COLUMNS.PHONE] || 'No number';
   
   const entry = document.createElement('div');
   entry.innerHTML = `
