@@ -157,17 +157,22 @@ async function checkForBirthdays() {
 // ========== SCHEDULING ========== //
 function scheduleNextCheck() {
   if (!isRunning) return;
-  
+
   const now = new Date();
-  const [hours, minutes] = document.getElementById('checkTime').value.split(':');
-  let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+  const [checkHours, checkMinutes] = document.getElementById('checkTime').value.split(':');
   
+  // Create next check time (today or tomorrow)
+  let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), checkHours, checkMinutes);
   if (nextCheck <= now) nextCheck.setDate(nextCheck.getDate() + 1);
+
+  const delay = nextCheck - now;
   
   checkInterval = setTimeout(() => {
     checkForBirthdays();
-    scheduleNextCheck();
-  }, nextCheck - now);
+    scheduleNextCheck(); // Schedule subsequent check
+  }, delay);
+
+  log(`Next check scheduled at ${nextCheck.toLocaleTimeString()}`);
 }
 
 // ========== WHATSAPP INTEGRATION ========== //
@@ -222,11 +227,12 @@ function updateProgress(row) {
 
 // ========== AUTOMATION CONTROL ========== //
 function startAutomation() {
-  isRunning = true;
-  updateButtonStates();
-  log('Automation started!');
-  checkForBirthdays();
-  scheduleNextCheck();
+  if (!isRunning) {
+    isRunning = true;
+    updateButtonStates();
+    log('Automation started!');
+    scheduleNextCheck(); // Start scheduling without immediate execution
+  }
 }
 
 function stopAutomation() {
