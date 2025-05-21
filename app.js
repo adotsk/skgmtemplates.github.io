@@ -2,7 +2,7 @@
 const SPREADSHEET_ID = '1QBQSYuf1-UxTi33zgCWPTdmPfCi2W2-NdbNUs0kiIbE';
 const SHEET_NAME = 'Form Responses 1';
 const CLIENT_ID = '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleusercontent.com';
-const COLUMNS = { NAME: 2, PHONE: 3, SALUTATION: 8, ACTION: 9 };
+const COLUMNS = { NAME: 1, PHONE: 2, SALUTATION: 7, ACTION: 8 };
 // ============================================ //
 
 // ========== ESSENTIAL FUNCTIONS FIRST ========== //
@@ -129,8 +129,8 @@ async function checkForBirthdays() {
     
     const recipients = rows.slice(1).filter(row => {
         // Ensure row has enough columns and check ACTION value
-      return row.length >= 9 && //COLUMNS.ACTION && 
-        row[9]?.trim() === 'Send'; //.toLowerCase() === 'Send';
+      return row.length >= 8 && //COLUMNS.ACTION && 
+        row[8]?.trim() === 'Send'; //.toLowerCase() === 'Send';
         //row[COLUMNS.ACTION]?.trim() === 'Send'; //.toLowerCase() === 'Send';
         //row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send' // Zero-based index
     });
@@ -175,9 +175,9 @@ function scheduleNextCheck() {
 async function WhatsAppMessage(row) {
   try {
     // Extract data with zero-based indices and default values
-    const name = row[COLUMNS.NAME] || '';
-    const phone = row[COLUMNS.PHONE] || '';
-    const salutation = row[COLUMNS.SALUTATION] || '';
+    const name = row[1] || ''; //COLUMNS.NAME] || '';
+    const phone = row[2] || ''; //COLUMNS.PHONE] || '';
+    const salutation = row[7] || ''; //COLUMNS.SALUTATION] || '';
 
     const message = document.getElementById('messageTemplate').value
       .replace('{name}', name)
@@ -208,8 +208,8 @@ function updateProgress(row) {
   const progressLog = document.getElementById('progressLog');
   if (!progressLog) return;
   
-  const name = row[COLUMNS.NAME] || 'Unknown';
-  const phone = row[COLUMNS.PHONE] || 'No number';
+  const name = row[1] || 'Unknown'; //COLUMNS.NAME] || 'Unknown';
+  const phone = row[2] || 'No number'; //COLUMNS.PHONE] || 'No number';
   
   const entry = document.createElement('div');
   entry.innerHTML = `
