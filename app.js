@@ -124,7 +124,7 @@ async function checkForBirthdays() {
 
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
-      row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'send' // Zero-based index
+      row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'Send' // Zero-based index
     );
 
     log(`Found ${recipients.length} messages to send`);
@@ -164,7 +164,7 @@ function scheduleNextCheck() {
 }
 
 // ========== WHATSAPP INTEGRATION ========== //
-async function sendWhatsAppMessage(row) {
+async function WhatsAppMessage(row) {
   try {
     // Extract data with zero-based indices and default values
     const name = row[COLUMNS.NAME - 1] || '';
@@ -181,7 +181,7 @@ async function sendWhatsAppMessage(row) {
       return;
     }
 
-    const whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://web.whatsapp.com/?phone=${formattedPhone}&text=${encodeURIComponent(message)}`;
     
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
@@ -191,7 +191,7 @@ async function sendWhatsAppMessage(row) {
     log(`Message queued for ${name}`);
 
   } catch (error) {
-    log(`Send Error: ${error.message}`);
+    log(` Error: ${error.message}`);
   }
 }
 
