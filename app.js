@@ -161,15 +161,15 @@ function scheduleNextCheck() {
   const now = new Date();
   const [checkHours, checkMinutes] = document.getElementById('checkTime').value.split(':');
   
-  // Create next check time (today or tomorrow)
-  let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), checkHours, checkMinutes);
-  if (nextCheck <= now) nextCheck.setDate(nextCheck.getDate() + 1);
+  // Always set next check to TOMORROW's target time
+  const nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), checkHours, checkMinutes);
+  nextCheck.setDate(nextCheck.getDate() + 1);
 
   const delay = nextCheck - now;
   
   checkInterval = setTimeout(() => {
     checkForBirthdays();
-    scheduleNextCheck(); // Schedule subsequent check
+    scheduleNextCheck(); // Re-schedule after completion
   }, delay);
 
   log(`Next check scheduled at ${nextCheck.toLocaleTimeString()}`);
