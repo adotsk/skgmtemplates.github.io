@@ -156,27 +156,50 @@ async function checkForBirthdays() {
 
 // ========== SCHEDULING ========== //
 function scheduleNextCheck() {
-  if (!isRunning) return;
+  if (!isRunning) {
+    log('Scheduler stopped: Automation not running');
+    return;
+  }
 
   const now = new Date();
-  const [checkHours, checkMinutes] = document.getElementById('checkTime').value.split(':');
-  
+  const checkTimeInput = document.getElementById('checkTime').value;
+  const [checkHours, checkMinutes] = checkTimeInput.split(':').map(Number);
+
+  // Validate input
+  if (isNaN(checkHours) || isNaN(checkMinutes)) {
+    log('Invalid check time format. Use HH:mm (24-hour)');
+    return;
+  }
+
   // Create target time for TODAY
-  let nextCheck = new Date(now.getFullYear(), now.getMonth(), now.getDate(), checkHours, checkMinutes);
-  
-  // If target time already passed today, schedule for tomorrow
+  const nextCheck = new Date();
+  nextCheck.setHours(checkHours, checkMinutes, 0, 0); // Reset seconds/milliseconds
+
+  // If time already passed today, schedule for tomorrow
   if (nextCheck <= now) {
+    log('Target time passed today - scheduling for tomorrow');
     nextCheck.setDate(nextCheck.getDate() + 1);
   }
 
   const delay = nextCheck - now;
-  
-  checkInterval = setTimeout(() => {
-    checkForBirthdays(); // Execute immediately when time matches
-    scheduleNextCheck(); // Schedule next day's check AFTER execution
-  }, delay);
 
-  log(`Next check scheduled at ${nextCheck.toLocaleTimeString()}`);
+  // Safety checks
+  if (delay < 0) {
+    log('Invalid negative delay detected. Resetting scheduler.');
+    return;
+  }
+
+  log(`Next check in ${Math.round(delay/1000)} seconds at ${nextCheck.toLocaleTimeString()}`);
+
+  // Clear previous timeout to prevent duplicates
+  if (checkInterval) clearTimeout(checkInterval);
+
+  checkInterval = setTimeout(() => {
+    log('--- CHECK TIME TRIGGERED ---');
+    checkForBirthdays()
+      .then(() => scheduleNextCheck()) // Re-schedule AFTER completion
+      .catch(error => log(`Scheduler error: ${error.message}`));
+  }, delay);
 }
 
 // ========== WHATSAPP INTEGRATION ========== //
