@@ -198,7 +198,7 @@ async function WhatsAppMessage(row) {
     log(`Message queued for ${name}`);
 
   } catch (error) {
-    log(` Error: ${error.message}`);
+    log(`Send Error: ${error.message}`);
   }
 }
 
