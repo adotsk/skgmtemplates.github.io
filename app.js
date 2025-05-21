@@ -2,7 +2,7 @@
 const SPREADSHEET_ID = '1QBQSYuf1-UxTi33zgCWPTdmPfCi2W2-NdbNUs0kiIbE';
 const SHEET_NAME = 'Form Responses 1';
 const CLIENT_ID = '30166017670-5sqtme9ru0mgh9u8kmakf7kqlf4uo23n.apps.googleusercontent.com';
-const COLUMNS = { NAME: 1, PHONE: 2, SALUTATION: 7, ACTION: 8 };
+const COLUMNS = { NAME: 2, PHONE: 3, SALUTATION: 8, ACTION: 9 };
 // ============================================ //
 
 // ========== ESSENTIAL FUNCTIONS FIRST ========== //
