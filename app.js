@@ -124,7 +124,7 @@ async function checkForBirthdays() {
 
     const rows = response.result.values || [];
     const recipients = rows.slice(1).filter(row => 
-      row[COLUMNS.ACTION]?.trim().toLowerCase() === 'send'
+      row[COLUMNS.ACTION - 1]?.trim().toLowerCase() === 'send' // Zero-based index
     );
 
     log(`Found ${recipients.length} messages to send`);
@@ -164,15 +164,20 @@ function scheduleNextCheck() {
 }
 
 // ========== WHATSAPP INTEGRATION ========== //
-async function sendWhatsAppMessage(person) {
+async function sendWhatsAppMessage(row) {
   try {
-    const message = document.getElementById('messageTemplate').value
-      .replace('{name}', person.name)
-      .replace('{salutation}', person.salutation);
+    // Extract data with zero-based indices and default values
+    const name = row[COLUMNS.NAME - 1] || '';
+    const phone = row[COLUMNS.PHONE - 1] || '';
+    const salutation = row[COLUMNS.SALUTATION - 1] || '';
 
-    const formattedPhone = person.phone.replace(/\D/g, '');
+    const message = document.getElementById('messageTemplate').value
+      .replace('{name}', name)
+      .replace('{salutation}', salutation);
+
+    const formattedPhone = phone.replace(/\D/g, '');
     if (!formattedPhone.startsWith('+')) {
-      log(`Invalid phone number: ${person.name}`);
+      log(`Invalid phone number: ${name}`);
       return;
     }
 
@@ -183,7 +188,7 @@ async function sendWhatsAppMessage(person) {
     iframe.src = whatsappUrl;
     document.body.appendChild(iframe);
     
-    log(`Message queued for ${person.name}`);
+    log(`Message queued for ${name}`);
 
   } catch (error) {
     log(`Send Error: ${error.message}`);
@@ -191,14 +196,17 @@ async function sendWhatsAppMessage(person) {
 }
 
 // ========== PROGRESS DISPLAY ========== //
-function updateProgress(recipient) {
+function updateProgress(row) {
   const progressLog = document.getElementById('progressLog');
   if (!progressLog) return;
   
+  const name = row[COLUMNS.NAME - 1] || 'Unknown';
+  const phone = row[COLUMNS.PHONE - 1] || 'No number';
+  
   const entry = document.createElement('div');
   entry.innerHTML = `
-    <strong>Recipient:</strong> ${recipient.name}<br>
-    <strong>Number:</strong> ${recipient.phone}<br>
+    <strong>Recipient:</strong> ${name}<br>
+    <strong>Number:</strong> ${phone}<br>
     <small>${new Date().toLocaleTimeString()}</small>
   `;
   progressLog.appendChild(entry);
