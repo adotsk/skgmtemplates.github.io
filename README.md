@@ -1,2 +1,2 @@
-git clone https://adotsk.github.io/skgmtemplates.github.io
-cd skgmtemplates
+git clone https://adotsk.github.io/skbirthdaytriggers.github.io
+cd skbirthdaytriggers
